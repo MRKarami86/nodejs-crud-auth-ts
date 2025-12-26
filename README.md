@@ -1,18 +1,25 @@
-# Node.js CRUD + JWT Authentication
+# Node.js CRUD Authentication API
 
-این پروژه یک سیستم **CRUD ساده با Node.js و Express.js** است که از **MongoMemoryServer** برای دیتابیس لوکال و **JWT** برای احراز هویت استفاده می‌کند.
+A TypeScript-based Node.js API for user authentication, CRUD operations, and secure token management using JWT. Designed for testing with **MongoMemoryServer** or local MongoDB.
 
-## ویژگی‌ها
+## Features
 
-- ثبت نام و ورود کاربران
-- JWT برای مسیرهای محافظت‌شده
-- CRUD کامل برای کاربر
-- رمزگذاری password با bcrypt
-- دیتابیس در حافظه → نیاز به نصب MongoDB ندارد
+- User registration and login
+- JWT-based authentication
+- User profile CRUD operations
+- In-memory MongoDB for testing (MongoMemoryServer)
+- TypeScript with Express.js
 
-## نصب و اجرا
+## Prerequisites
 
-1. کلون کردن ریپازیتوری
+- Node.js v18+  
+- npm  
+- Optional: MongoDB installed locally for persistent storage
+
+## Installation
+
+1. Clone the repository:
+
 ```bash
-git clone https://github.com/MRKarami86/nodejs-crud-auth.git
+git clone https://github.com/username/nodejs-crud-auth.git
 cd nodejs-crud-auth
