@@ -1,49 +1,27 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { MongoMemoryServer } from 'mongodb-memory-server';
-
-
 import mongoose from 'mongoose';
-
 import app from './app';
-
-
-console.log('Starting server...');
 
 const startServer = async (): Promise<void> => {
   try {
-    console.log('Creating in-memory MongoDB...');
+    // بررسی MONGO_URI
+    if (!process.env.MONGO_URI) {
+      throw new Error('MONGO_URI is not defined in .env');
+    }
 
+    // اتصال به MongoDB واقعی (Remote یا Local)
+    console.log('Connecting to MongoDB...');
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log('DB Connected (MongoDB)');
 
-    const mongod = await MongoMemoryServer.create(
-      {binary: {
-      version: '6.0.6',
-      downloadDir: 'C:\\Program Files\\MongoDB\\Server\\8.2\\'
-    }});
-
-    
-    const uri: string = mongod.getUri();
-
-    console.log('MongoDB URI:', uri);
-
-
-
-    await mongoose.connect(uri);
-
-    console.log('DB Connected (in-memory)');
-
-    const PORT: number = process.env.PORT
-      ? Number(process.env.PORT)
-      : 3000;
-
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-
+    // شروع سرور
+    const PORT = Number(process.env.PORT) || 3000;
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   } catch (err) {
     console.error('Error starting server:', err);
-    process.exit(1); // fail fast
+    process.exit(1);
   }
 };
 
