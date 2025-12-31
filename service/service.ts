@@ -1,27 +1,42 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
-export interface IUserInfo {
+export interface IUserInfoWithoutId {
     userName:string;
     email:string;
-    password : string;
 }
+
+
+export interface IUserWithPassword extends IUserInfoWithoutId {
+ password:string
+}
+
+export interface IUserInfoWithId extends IUserWithPassword {
+    id:string
+}
+
+
  export interface IUserRepository {
-    addUser (user: IUserInfo):Promise<void>;
-    findByEmail(email:string):Promise<any>;
-    findById(id: string): Promise<any>;
-    updateUser(userId:string,data:IUserInfo):Promise<any>;
+    addUser (user: IUserWithPassword):Promise<void>;
+    findByEmail(email:string):Promise<IUserInfoWithId>;
+    findById(id: string): Promise<IUserInfoWithId>;
+    updateUser(userId:string,data:IUserInfoWithoutId):Promise<void>;
  }
+
+export interface IHashService{
+    hash(arg:string):Promise<string>
+    compare(claimedPassword:string, actualPassword:string):Promise<void>
+}
 
 
 export class UserService {
-    constructor (private userRepo: IUserRepository){
+    constructor (private userRepo: IUserRepository, private readonly hasService:IHashService){
 
     }
-    addUser =async (user : IUserInfo)=>{
+    addUser =async (user : IUserWithPassword)=>{
         const {userName, email, password} = user;
 
-        //hash
+        
         await this.userRepo.addUser(user);
     }
 
@@ -32,11 +47,9 @@ export class UserService {
             throw new Error('Invalid credetials');
         }
 
-        const isPasswordVlid = await bcrypt.compare(password, user.password);
-
-        if(!isPasswordVlid){
-            throw new Error('Invalid credetials');
-        }
+        
+      this.hasService.compare(password, user.password)
+        
 
         const secret = process.env.JWT_SECRET;
         if(!secret){
