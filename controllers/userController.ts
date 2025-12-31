@@ -1,5 +1,6 @@
 import {Request, Response} from 'express';
 import { UserService } from '../service/service';
+import { AuthRequest } from '../middleware/authMiddleware';
 
 
 export class UserController{
@@ -18,6 +19,7 @@ export class UserController{
             email,
             password
         });
+    
         res.json({message:'User Created'});
     };
 
@@ -29,9 +31,14 @@ export class UserController{
         res.json({token});
     }
 
-    update = async (req:Request, res:Response):Promise<void>{
+    update = async (req:AuthRequest, res:Response):Promise<void> =>{
         const userId = req.userId;
         const {userName, email, password} = req.body;
+
+        if (!userId) {
+            res.status(401).json({ message: 'Unauthorized' });
+            return;
+        }
 
         await this.userService.update(userId,{userName, email, password});
 

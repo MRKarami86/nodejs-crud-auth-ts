@@ -10,6 +10,7 @@ export interface IUserInfo {
     addUser (user: IUserInfo):Promise<void>;
     findByEmail(email:string):Promise<any>;
     findById(id: string): Promise<any>;
+    updateUser(userId:string,data:IUserInfo):Promise<any>;
  }
 
 
@@ -54,7 +55,7 @@ export class UserService {
     async update(userId:string,data:IUserInfo){
         const user = await this.userRepo.findById(userId);
 
-        const data.password = await bcrypt.hash(data.password,10);
+        data.password = await bcrypt.hash(data.password,10);
 
         await this.userRepo.updateUser(userId,data);
     }

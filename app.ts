@@ -6,7 +6,7 @@ import { swaggerSpec } from './swagger';
 
 const app: Application = express();
 
-
+app.use(express.json());
 
 app.use('/users', userRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
