@@ -50,5 +50,13 @@ export class UserService {
 
         return token;
     }
+
+    async update(userId:string,data:IUserInfo){
+        const user = await this.userRepo.findById(userId);
+
+        const data.password = await bcrypt.hash(data.password,10);
+
+        await this.userRepo.updateUser(userId,data);
+    }
 }
 

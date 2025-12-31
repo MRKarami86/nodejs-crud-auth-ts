@@ -14,5 +14,8 @@ export class userRepository implements IUserRepository {
         return User.findById(id);
     }
 
+    async updateUser(id:string,data:any){
+        return User.findByIdAndUpdate(id.data);
+    }
+
 }
- 

@@ -28,6 +28,15 @@ export class UserController{
 
         res.json({token});
     }
+
+    update = async (req:Request, res:Response):Promise<void>{
+        const userId = req.userId;
+        const {userName, email, password} = req.body;
+
+        await this.userService.update(userId,{userName, email, password});
+
+        res.json({message:'User updated successfully'});
+    }
 }
 
 
