@@ -1,8 +1,8 @@
-import {IUserInfo, IUserRepository } from '../service/service'
+import {IUserWithPassword, IUserInfoWithId} from '../service/service'
 import User from './User'
 
-export class userRepository implements IUserRepository {
-    async addUser(user: IUserInfo): Promise<void> {
+export class userRepository implements IUserInfoWithId {
+    async addUser(user: IUserWithPassword): Promise<void> {
         await User.create(user);
     }
 
@@ -16,6 +16,10 @@ export class userRepository implements IUserRepository {
 
     async updateUser(id:string,data:any){
         return User.findByIdAndUpdate(id,data);
+    }
+
+    async deleteUser(id:string){
+        return User.findByIdAndUpdate(id);
     }
 
 }

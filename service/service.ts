@@ -21,6 +21,7 @@ export interface IUserInfoWithId extends IUserWithPassword {
     findByEmail(email:string):Promise<IUserInfoWithId>;
     findById(id: string): Promise<IUserInfoWithId>;
     updateUser(userId:string,data:IUserInfoWithoutId):Promise<void>;
+    delete(userId:string):Promise<IUserInfoWithId>;
  }
 
 export interface IHashService{
@@ -57,7 +58,7 @@ export class UserService {
         }
 
         const token = jwt.sign(
-            {userId:user._id},
+            {userId:user.id},
             secret,
             {expiresIn:'1d'}
         )
@@ -65,12 +66,24 @@ export class UserService {
         return token;
     }
 
-    async update(userId:string,data:IUserInfo){
+    async update(userId:string,data:IUserWithPassword){
         const user = await this.userRepo.findById(userId);
 
         data.password = await bcrypt.hash(data.password,10);
 
         await this.userRepo.updateUser(userId,data);
     }
+
+    async delete(userId:string){
+        const user = await this.userRepo.delete(userId);
+
+        if(!user){
+            throw new Error('User not found or could not be deleted');
+        }
+
+        return user;
+    }
+
+
 }
 

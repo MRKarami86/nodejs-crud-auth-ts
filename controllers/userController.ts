@@ -44,6 +44,19 @@ export class UserController{
 
         res.json({message:'User updated successfully'});
     }
+
+
+    delete = async (req:AuthRequest, res:Response):Promise<void> => {
+        const userId = req.userId;
+
+        if(!userId){
+            res.status(401).json({message:'User does not exist'});
+            return;
+        }
+
+        await this.userService.delete(userId);
+        res.status(200).json({message:'User deleted'});
+    }
 }
 
 
