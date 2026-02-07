@@ -16,17 +16,17 @@ export interface IUserInfoWithId extends IUserWithPassword {
 }
 
 
- export interface IUserRepository {
-    addUser (user: IUserWithPassword):Promise<void>;
-    findByEmail(email:string):Promise<IUserInfoWithId>;
-    findById(id: string): Promise<IUserInfoWithId>;
-    updateUser(userId:string,data:IUserInfoWithoutId):Promise<void>;
-    delete(userId:string):Promise<IUserInfoWithId>;
- }
+export interface IUserRepository {
+    addUser(user: IUserWithPassword): Promise<void>;
+    findByEmail(email: string): Promise<IUserInfoWithId | null>;  // ← اضافه کردن | null
+    findById(id: string): Promise<IUserInfoWithId | null>;        // ← اضافه کردن | null
+    updateUser(userId: string, data: Partial<IUserWithPassword>): Promise<void>;
+    delete(userId: string): Promise<IUserInfoWithId | null>;      // ← اضافه کردن | null
+}
 
 export interface IHashService{
     hash(arg:string):Promise<string>
-    compare(claimedPassword:string, actualPassword:string):Promise<void>
+    compare(claimedPassword:string, actualPassword:string):Promise<boolean>  // change To boolean type
 }
 
 
@@ -41,35 +41,50 @@ export class UserService {
         await this.userRepo.addUser(user);
     }
 
-    async login(email:string, password:string):Promise<string>{
+    async login(email:string, password:string):Promise<{
+        user: IUserInfoWithoutId;
+        tokenData:{userId:string, email:string}
+    }>{
         const user = await this.userRepo.findByEmail(email);
 
         if(!user){
             throw new Error('Invalid credetials');
         }
 
-        
-      this.hasService.compare(password, user.password)
-        
+        return {
+            user: user,
+            tokenData : {userId: user.id, email: user.email}};
 
-        const secret = process.env.JWT_SECRET;
-        if(!secret){
-            throw new Error('JWT_SECRET is not defined');
-        }
-
-        const token = jwt.sign(
-            {userId:user.id},
-            secret,
-            {expiresIn:'1d'}
-        )
-
-        return token;
+       
     }
 
     async update(userId:string,data:IUserWithPassword){
         const user = await this.userRepo.findById(userId);
+        if(!user) throw new Error('User not found');
 
-        data.password = await bcrypt.hash(data.password,10);
+        
+        const isMatch = await this.hasService.compare(data.password, user.password);
+        if(!isMatch) throw new Error('Current Password incorrect');
+
+        if(data.userName){
+            if(data.userName.length < 5){
+                throw new Error('Username must be at least 5 characters long');
+            }
+        }
+
+        if(data.email){
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if(!emailRegex.test(data.email)){
+                throw new Error('Invalid email format');
+            }
+        }
+
+        if(data.password){
+            if(data.password.length < 10){
+                throw new Error('Password must be at least 10 characters long');
+            }
+            data.password = await bcrypt.hash(data.password,10);
+        }
 
         await this.userRepo.updateUser(userId,data);
     }

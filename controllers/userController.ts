@@ -1,12 +1,11 @@
 import {Request, Response} from 'express';
 import { UserService } from '../service/service';
 import { AuthRequest } from '../middleware/authMiddleware';
+import { IAuthExternalService } from '../utils/authExternal'; // ایمپورت سرویس جدید
 
 
 export class UserController{
-    constructor(private userService:UserService){
-        
-    }
+    constructor(private userService:UserService , private AuthExternalService:IAuthExternalService){}
     register = async (req:Request, res:Response)   :Promise<void>=>{
         const {userName, email, password}:{
             userName : string;
@@ -26,7 +25,9 @@ export class UserController{
     login= async (req:Request, res:Response):Promise<void>=>{
         const {email, password} = req.body;
 
-        const token = await this.userService.login(email,password);
+        const {user , tokenData} = await this.userService.login(email,password)
+
+        const token = await this.AuthExternalService.generateToken(tokenData.userId , tokenData.email)
 
         res.json({token});
     }
