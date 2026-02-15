@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { LoginDomain } from '../domain/auth/loginDomain';
 
 export interface IUserInfoWithoutId {
     userName:string;
@@ -31,9 +32,11 @@ export interface IHashService{
 
 
 export class UserService {
-    constructor (private userRepo: IUserRepository, private readonly hasService:IHashService){
+    constructor (
+        private loginDomain: LoginDomain
+    ){}
 
-    }
+
     addUser =async (user : IUserWithPassword)=>{
         const {userName, email, password} = user;
 
@@ -41,22 +44,11 @@ export class UserService {
         await this.userRepo.addUser(user);
     }
 
-    async login(email:string, password:string):Promise<{
-        user: IUserInfoWithoutId;
-        tokenData:{userId:string, email:string}
-    }>{
-        const user = await this.userRepo.findByEmail(email);
-
-        if(!user){
-            throw new Error('Invalid credetials');
-        }
-
-        return {
-            user: user,
-            tokenData : {userId: user.id, email: user.email}};
-
-       
+    async login(email:string, password:string){
+        const token = await this.loginDomain.execute(email,password);
+        return {token};
     }
+    
 
     async update(userId:string,data:IUserWithPassword){
         const user = await this.userRepo.findById(userId);
